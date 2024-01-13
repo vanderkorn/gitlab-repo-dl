@@ -6,7 +6,7 @@ Get yourself an API token from you GitLab instance then export `GITLAB_URL` and 
 
 The script assume you will clone/pull over SSH.
 
-Requirements: bash, curl, jq, sed, awk, grep
+Requirements: bash, curl, jq, sed, awk, grep, git, 7z
 
 ## Download all projects from a group
 

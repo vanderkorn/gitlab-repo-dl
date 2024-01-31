@@ -29,7 +29,7 @@ if [ "$1" == "group" ]; then
     TOTAL_PAGES=`curl "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100" -sI | grep x-total-pages | awk '{print $2}' | sed 's/\\r//g'`
 
     for ((PAGE_NUMBER = 1; PAGE_NUMBER <= TOTAL_PAGES; PAGE_NUMBER++)); do
-        REPO_SSH_URLS=$(curl -s "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g')
+        REPO_SSH_URLS=$(curl -s "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100&page=$PAGE_NUMBER" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g')
 
         for REPO_SSH_URL in $REPO_SSH_URLS; do
             REPO_PATH="$GROUP_NAME/$(echo "$REPO_SSH_URL" | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}')"

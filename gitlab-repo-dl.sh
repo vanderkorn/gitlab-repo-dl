@@ -66,7 +66,7 @@ elif [ "$1" == "all-repo-list" ]; then
             curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&per_page=20&page=$PAGE_NUMBER&membership=true" | jq '.[] | .http_url_to_repo' | sed 's/"//g' |  sed 's/http:/https:/'
         else
             echo "Switch to to ssh protocol"
-            curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&per_page=20&page=$PAGE_NUMBER&membership=true" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g' |  sed 's/http:/https:/'
+            curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&per_page=20&page=$PAGE_NUMBER&membership=true" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g'
         fi
     done
 elif [ "$1" == "from-list" ]; then

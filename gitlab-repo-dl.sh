@@ -34,16 +34,15 @@ if [ "$1" == "group" ]; then
     TOTAL_PAGES=`curl "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100" -sI | grep -e x-total-pages -e X-Total-Pages | awk '{print $2}' | sed 's/\\r//g'`
 
     for ((PAGE_NUMBER = 1; PAGE_NUMBER <= TOTAL_PAGES; PAGE_NUMBER++)); do
+        if [[ "$GITLAB_PROTOCOL" == "https" ]]; then
+            echo "Switch to to https protocol"
+            REPO_SSH_URLS=$(curl -s "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100&page=$PAGE_NUMBER" | jq '.[] | .http_url_to_repo' | sed 's/"//g' | sed 's/http:/https:/')
+        else
+            echo "Switch to to ssh protocol"
+            REPO_SSH_URLS=$(curl -s "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100&page=$PAGE_NUMBER" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g')
+        fi
 
-		if [[ "$GITLAB_PROTOCOL" == "https" ]]; then
-			echo "Switch to to https protocol"
-			REPO_SSH_URLS=$(curl -s "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100&page=$PAGE_NUMBER" | jq '.[] | .http_url_to_repo' | sed 's/"//g' | sed 's/http:/https:/')
-		else
-			echo "Switch to to ssh protocol"
-		    REPO_SSH_URLS=$(curl -s "$GITLAB_URL/api/v4/groups/$GROUP_NAME/projects?private_token=$GITLAB_TOKEN&per_page=100&page=$PAGE_NUMBER" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g')
-		fi
-
-		for REPO_SSH_URL in $REPO_SSH_URLS; do
+        for REPO_SSH_URL in $REPO_SSH_URLS; do
             REPO_PATH="$GROUP_NAME/$(echo "$REPO_SSH_URL" | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}')"
 
             if [ ! -d "$REPO_PATH" ]; then
@@ -62,13 +61,13 @@ elif [ "$1" == "all-repo-list" ]; then
     TOTAL_PAGES=`curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&membership=true" -sI | grep -e x-total-pages -e X-Total-Pages | awk '{print $2}' | sed 's/\\r//g'`
      
     for ((PAGE_NUMBER = 1; PAGE_NUMBER <= TOTAL_PAGES; PAGE_NUMBER++)); do
-		if [[ "$GITLAB_PROTOCOL" == "https" ]]; then
-			echo "Switch to to https protocol"
-			curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&per_page=20&page=$PAGE_NUMBER&membership=true" | jq '.[] | .http_url_to_repo' | sed 's/"//g' |  sed 's/http:/https:/'
-		else
-			echo "Switch to to ssh protocol"
-			curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&per_page=20&page=$PAGE_NUMBER&membership=true" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g' |  sed 's/http:/https:/'
-		fi
+        if [[ "$GITLAB_PROTOCOL" == "https" ]]; then
+            echo "Switch to to https protocol"
+            curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&per_page=20&page=$PAGE_NUMBER&membership=true" | jq '.[] | .http_url_to_repo' | sed 's/"//g' |  sed 's/http:/https:/'
+        else
+            echo "Switch to to ssh protocol"
+            curl "$GITLAB_URL/api/v4/projects?private_token=$GITLAB_TOKEN&per_page=20&page=$PAGE_NUMBER&membership=true" | jq '.[] | .ssh_url_to_repo' | sed 's/"//g' |  sed 's/http:/https:/'
+        fi
     done
 elif [ "$1" == "from-list" ]; then
     if [ -z "$2" ]; then
